@@ -43,7 +43,7 @@
 .containerLogin {
   margin: auto;
   padding: 20px;
-  background-color: rgb(232, 255, 255);
+  background-color: rgb(232, 255, 255) !important;
   border-radius: 10px;
   border: 1px solid rgb(226, 226, 226);
 }
@@ -60,6 +60,7 @@
 
 .dividerBr {
   margin-top: 40px;
+  background: rgb(50, 205, 50);
 }
 
 .snackError {
@@ -211,4 +212,31 @@
 
 .btnModal {
   margin-left: 5px;
+}
+
+.containerLogin {
+  margin: auto;
+  padding: 20px;
+  background-color: rgb(232, 255, 255);
+  border-radius: 10px;
+  border: 1px solid rgb(226, 226, 226);
+}
+
+.inputLogin {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.btnLogin {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.dividerBr {
+  margin-top: 40px;
+}
+
+.snackError {
+  background-color: rgb(238, 28, 28) !important;
+  color: #fff;
 }

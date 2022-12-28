@@ -3,7 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   publicRuntimeConfig: {
-    basePath: "basePath",
+    basePath: "/",
   },
 };
 

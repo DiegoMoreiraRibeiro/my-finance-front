@@ -1,4 +1,3 @@
-import { Dayjs } from "dayjs";
 import { getDateYYYYmmdd } from "../date/date";
 
 export default class MovimentacoesModel {

@@ -5,7 +5,6 @@ import { AuthProvider } from "../context/AuthContext";
 
 import "./../styles/globals.css";
 import "./../styles/main.css";
-import "./../styles/Index.module.css";
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;

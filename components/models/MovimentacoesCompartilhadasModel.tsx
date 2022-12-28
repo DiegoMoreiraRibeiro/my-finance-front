@@ -1,5 +1,3 @@
-import { Dayjs } from "dayjs";
-
 export default class MovimentacoesCompartilhadasModel {
   Id?: number;
   UsuarioId?: number;
