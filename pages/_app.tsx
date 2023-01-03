@@ -3,8 +3,8 @@ import type { NextPage } from "next";
 import type { AppProps } from "next/app";
 import { AuthProvider } from "../context/AuthContext";
 
-import "../public/styles/globals.css";
-import "../public/styles/main.css";
+import "./../styles/globals.css";
+import "./../styles/main.css";
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;

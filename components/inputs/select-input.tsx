@@ -7,6 +7,7 @@ function SelectInput(props: any) {
     listOpts,
     keyValue,
     keyDesc,
+    required,
   } = props;
 
   function change(value: string) {
@@ -22,8 +23,9 @@ function SelectInput(props: any) {
       onChange={(e) => {
         change(e.target.value);
       }}
+      required
     >
-      <option key={0} value={0}>
+      <option key={0} value={""}>
         {placeholder}
       </option>
       {listOpts.map((item) => (

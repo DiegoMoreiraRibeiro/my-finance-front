@@ -1,0 +1,239 @@
+.modalCustom {
+  position: absolute !important  ;
+  top: 30% !important  ;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 50% !important;
+  background-color: #fff !important;
+  border: 1px solid rgb(226, 226, 226) !important;
+  box-shadow: 24 !important;
+  margin: auto !important;
+  padding: 20px !important;
+  border-radius: 5px !important;
+}
+
+.form-modal {
+  margin-top: 30px !important;
+}
+
+.div-modal-btns {
+  float: right !important;
+}
+
+.input-text-custom {
+  width: 100% !important;
+}
+
+.input-text-custom {
+  padding: 6px !important;
+  font-size: 16px !important;
+  border-width: 1px !important;
+  border-color: #cccccc !important;
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border-style: solid !important;
+  border-radius: 5px !important;
+  box-shadow: 0px 0px 1px rgba(66, 66, 66, 0.75) !important;
+  text-shadow: 0px 0px 0px rgba(66, 66, 66, 0.75) !important;
+}
+.input-text-custom:focus {
+  outline: none !important;
+}
+
+.btnLogin {
+  width: 100% !important;
+  margin-top: 20px !important;
+}
+
+.form-flex {
+  display: flex !important;
+}
+
+.gridCard {
+  display: inline !important;
+}
+
+.gridEntrada {
+  background: rgb(50, 205, 50) !important;
+  background: linear-gradient(
+    90deg,
+    rgba(50, 205, 50, 1) 0%,
+    rgba(0, 255, 0, 0.4458158263305322) 100%
+  ) !important;
+  padding: 10px !important;
+  margin: 5px !important;
+  border-radius: 10px !important;
+  color: #fff !important;
+}
+
+.gridSaida {
+  background: rgb(178, 34, 34) !important;
+  background: linear-gradient(
+    94deg,
+    rgba(178, 34, 34, 1) 0%,
+    rgba(128, 0, 0, 0.6054796918767507) 100%
+  ) !important;
+  padding: 10px !important;
+  margin: 5px !important;
+  border-radius: 10px !important;
+  color: #fff !important;
+}
+
+.gridContainer {
+  display: flex !important;
+  margin-top: 20px !important;
+}
+
+.lbValor {
+  font-size: 36px !important;
+  font-weight: bold !important;
+}
+
+.btnPesquisar {
+  margin: 10px !important;
+  height: 50px !important;
+  width: 150px !important;
+}
+
+.tableMovi {
+  margin-top: 15px !important;
+  margin-bottom: 25px !important;
+  text-align: center !important;
+}
+
+.tableHead {
+  background-color: rgb(235, 235, 235) !important;
+}
+
+.vazio {
+  text-align: center !important;
+}
+
+.divBtnPesquisa {
+  margin-top: 40px !important;
+  border-top: 1px solid rgb(241, 241, 241) !important;
+  padding: 20px !important;
+}
+
+.gridTableMovi {
+  margin: auto !important;
+  width: 98% !important;
+  text-align: center !important;
+}
+
+.moneyAdd {
+  background-color: #32cd32 !important;
+  border-radius: 10px !important;
+  padding: 5px !important;
+  color: #fff !important;
+  width: 50% !important;
+}
+
+.moneyRem {
+  background-color: #d31111 !important;
+  border-radius: 10px !important;
+  padding: 5px !important;
+  color: #fff !important;
+  width: 50% !important;
+}
+
+.iconLabel {
+  font-size: 14px !important;
+}
+
+.divBottom {
+  justify-content: space-between !important;
+  flex-direction: column !important;
+  display: flex !important;
+}
+.divBottom .divBottomHolder {
+  position: absolute !important;
+  bottom: 0 !important;
+  right: 0 !important;
+  padding: 20px !important;
+}
+.input12 {
+  width: 100% !important;
+  margin-bottom: 10px !important;
+}
+
+.input6 {
+  width: 50% !important;
+  margin-bottom: 10px !important;
+  display: block !important;
+}
+
+.divInline6 {
+  display: inline !important;
+  width: 100% !important;
+}
+.btnCircle {
+  display: block !important;
+  width: 40px !important;
+  height: 58px !important;
+  line-height: 40px !important;
+  border-radius: 50% !important;
+  color: #fff !important;
+  text-align: center !important;
+  text-decoration: none !important;
+  font-size: 35px !important;
+  font-weight: bold !important;
+  -webkit-box-shadow: 10px 10px 5px -10px rgba(0, 0, 0, 0.75) !important;
+  -moz-box-shadow: 10px 10px 5px -10px rgba(0, 0, 0, 0.75) !important;
+  box-shadow: 10px 10px 5px -10px rgba(0, 0, 0, 0.75) !important;
+}
+
+.btnCircleEdit {
+  background-color: #44c767;
+  border-radius: 34px;
+  display: inline-block;
+  cursor: pointer;
+  color: #ffffff;
+  font-family: Arial;
+  font-size: 8px;
+  padding: 5px 0px;
+  text-decoration: none;
+}
+
+.btnCircleRemove {
+  background-color: #d43c00;
+  border-radius: 34px;
+  display: inline-block;
+  cursor: pointer;
+  color: #ffffff;
+  font-family: Arial;
+  font-size: 8px;
+  padding: 5px 0px;
+  text-decoration: none;
+  margin-left: 5px;
+}
+
+.containerModal {
+  margin-top: 50px !important;
+}
+
+.btnModal {
+  margin-left: 5px !important;
+}
+
+.containerLogin {
+  margin: auto !important;
+  padding: 20px !important;
+  background-color: rgb(218, 218, 218) !important;
+  border-radius: 10px !important;
+  border: 1px solid rgb(226, 226, 226) !important;
+}
+
+.inputLogin {
+  width: 100% !important;
+  margin-bottom: 10px !important;
+}
+
+.dividerBr {
+  margin-top: 40px !important;
+}
+
+.snackError {
+  background-color: rgb(238, 28, 28) !important;
+  color: #fff !important;
+}

@@ -1,11 +1,12 @@
 import axios from "axios";
 import { parseCookies } from "nookies";
+import { HelperServices } from "./helper.services";
 
 export function getAPIClient(ctx?: any) {
   const { "nextauth.token": token } = parseCookies(ctx);
 
   const api = axios.create({
-    baseURL: "http://localhost:3333",
+    baseURL: HelperServices().BaseURL,
   });
 
   api.interceptors.request.use((config) => {

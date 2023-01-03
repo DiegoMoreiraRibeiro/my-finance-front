@@ -5,6 +5,8 @@ import { parseCookies } from "nookies";
 import { ReactElement } from "react";
 import Theme from "../../components/views/theme";
 import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import RemoveIcon from "@mui/icons-material/Delete";
 import ThumbDownOffAltIcon from "@mui/icons-material/ThumbDownOffAlt";
 import ThumbUpOffAlt from "@mui/icons-material/ThumbUpOffAlt";
 import {
@@ -29,7 +31,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Get, Post } from "../../services/api";
+import { Delete, Get, Post, Put } from "../../services/api";
 import {
   DateToISO,
   DateToString,
@@ -42,50 +44,96 @@ import {
   maskDate,
   getDateYYYYmmdd,
   covertDateYYYYmmdd,
+  convertDateYYYYmmdd,
 } from "../../components/date/date";
-import MovimentacoesCompartilhadasModel from "../../components/models/MovimentacoesCompartilhadasModel";
 import TextInput from "../../components/inputs/text-input";
 import SelectInput from "../../components/inputs/select-input";
 import { maskCurrency } from "../../components/utils/mask";
+import AlertDialog from "../../components/utils/Dialog";
 
 function Movimentacoes() {
   const { "nextauth.id": id } = parseCookies();
   const { handleSubmit } = useForm();
 
-  const [compartilharSaida, setCompartilharSaida] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogRemoveId, setDialogRemoveId] = useState(0);
+
+  const [addMovimentacao, setAddMovimentacao] = useState(false);
+
   const [listUsuarios, setListUsuarios] = useState([]);
 
   const [movimentacoesModel, setMovimentacoesModel] =
     useState<MovimentacoesModel>(new MovimentacoesModel());
 
-  const [
-    movimentacoesCompartilhadasModel,
-    setMovimentacoesCompartilhadasModel,
-  ] = useState<MovimentacoesCompartilhadasModel>(
-    new MovimentacoesCompartilhadasModel()
-  );
-
+  const [valorMask, setValorMask] = useState("0");
   const [rowsMovimentacoes, setRowsMovimentacoes] = useState([]);
-  const [valorEntrada, setValorEntrada] = useState(0);
+  const [valorEntrada, setValorEntrada] = useState("0");
   const [valorSaida, setValorSaida] = useState(0);
   const [ano, setAno] = React.useState("");
   const [listAnos, setListAnos] = useState([{ Ano: 2022 }]);
   const [mes, setMes] = React.useState("");
   const [msgShowSuccess, setMsgShowSuccess] = React.useState("");
   const [msgShowError, setMsgShowError] = React.useState("");
-  const [active, setActive] = useState(false);
+  const [activeShowError, setActiveShowError] = useState(false);
+  const [activeShowSuccess, setActiveShowSuccess] = useState(false);
 
   //#region Modal
   const [open, setOpen] = useState(false);
+
   const handleOpenAdd = () => {
+    setAddMovimentacao(true);
     const obj = new MovimentacoesModel();
-    setMovimentacoesModel(obj);
     setMovimentacoesModel({
       ...obj,
       UsuarioId: parseInt(id),
     });
+    setValorMask("0");
     setOpen(true);
   };
+
+  const handleOpenEdit = (row) => {
+    debugger;
+    setAddMovimentacao(false);
+    setMovimentacoesModel({
+      UsuarioId: parseInt(id),
+      DataMovimentacao: new Date(row.DataMovimentacao),
+      Descricao: row.Descricao,
+      TipoAcaoId: row.TipoAcaoId,
+      Id: row.Id,
+      MovimentacaoCompartilhada: row.MovimentacaoCompartilhada,
+      UsuarioMovimentacaoCompartilhadaId:
+        row.UsuarioMovimentacaoCompartilhada.Id,
+      Valor: row.Valor,
+    });
+    setValorMask(maskCurrency(parseFloat(row.Valor).toFixed(2)));
+    setOpen(true);
+  };
+
+  const handleOpenRemove = (row) => {
+    debugger;
+    setDialogOpen(true);
+    setDialogRemoveId(row.Id);
+  };
+
+  async function trataRetornoDialogRemove(tipo) {
+    debugger;
+    if (tipo) {
+      await removeMovimentacao(dialogRemoveId);
+    } else {
+      setDialogOpen(false);
+      setDialogRemoveId(0);
+    }
+  }
+
+  async function removeMovimentacao(id) {
+    const ret = await Delete("movimentacao/" + id);
+    showMsgSuccess("Movimentação removida com sucesso!");
+    listarMovimentacoes(null, null);
+    setDialogOpen(false);
+    setDialogRemoveId(0);
+    return ret;
+  }
+
   const handleClose = () => setOpen(false);
   //#endregion
 
@@ -131,48 +179,102 @@ function Movimentacoes() {
 
   function closeMsgSucces() {
     setMsgShowSuccess("");
-    setActive(false);
+    setActiveShowSuccess(false);
   }
 
   function closeMsgError() {
     setMsgShowError("");
-    setActive(false);
+    setActiveShowSuccess(false);
   }
 
   async function buscarMovimentacoes() {
     if (ano == "" || mes == "") {
-      setActive(true);
       setMsgShowError("Selecione um ano e mês");
+      setActiveShowError(true);
     } else {
-      debugger;
       await listarMovimentacoes(mes, ano);
+    }
+  }
+
+  async function alterarMovimentacao() {
+    debugger;
+    let obj = movimentacoesModel;
+    obj.Valor = parseFloat(valorMask.replace(".", "").replace(",", "."));
+
+    if (
+      obj.MovimentacaoCompartilhada &&
+      obj.MovimentacaoCompartilhada != undefined
+    ) {
+      const valor = obj.Valor ?? 0;
+      obj.Valor = valor / 2;
+    }
+    const ret = await Put("movimentacao", obj);
+
+    if (ret.status == 200) {
+      showMsgSuccess("Movimentação cadastrada com sucesso!");
+
+      if (obj.MovimentacaoCompartilhada) {
+        await Delete("movimentacao/" + obj.UsuarioMovimentacaoCompartilhadaId);
+
+        obj.UsuarioId = obj.UsuarioMovimentacaoCompartilhadaId;
+        obj.UsuarioMovimentacaoCompartilhadaId = parseInt(id);
+        obj.TipoAcaoId = 2;
+        const retM = await Post("movimentacao", obj);
+
+        if (retM.status == 201) {
+          showMsgSuccess("Movimentação cadastrada com sucesso!");
+          setOpen(false);
+        }
+      } else {
+        setOpen(false);
+      }
+
+      setOpen(false);
+      listarMovimentacoes(null, null);
     }
   }
 
   async function cadastrarMovimentacao() {
     debugger;
     let obj = movimentacoesModel;
-    if (compartilharSaida) {
-      obj.MovimentacaoCompartilhada = compartilharSaida;
-      const valor = parseFloat(obj.Valor ?? "0");
-      obj.Valor = (valor / 2).toString();
+    obj.Valor = parseFloat(valorMask.replace(".", "").replace(",", "."));
+    if (obj.MovimentacaoCompartilhada) {
+      const valor = obj.Valor ?? 0;
+      obj.Valor = valor / 2;
     }
     const ret = await Post("movimentacao", obj);
 
+    debugger;
     if (ret.status == 201) {
-      if (compartilharSaida) {
-        obj.UsuarioId = movimentacoesCompartilhadasModel.UsuarioId;
-        const ret = await Post("movimentacao", obj);
+      showMsgSuccess("Movimentação cadastrada com sucesso!");
+
+      if (obj.MovimentacaoCompartilhada) {
+        obj.UsuarioId = obj.UsuarioMovimentacaoCompartilhadaId;
+        obj.UsuarioMovimentacaoCompartilhadaId = parseInt(id);
+        obj.TipoAcaoId = 2;
+        const retM = await Post("movimentacao", obj);
+
+        if (retM.status == 201) {
+          showMsgSuccess("Movimentação cadastrada com sucesso!");
+          setOpen(false);
+        }
+      } else {
+        setOpen(false);
       }
+
+      listarMovimentacoes(null, null);
     }
   }
 
+  function showMsgSuccess(msg: string) {
+    setMsgShowSuccess(msg);
+    setActiveShowSuccess(true);
+  }
   const handleChangeAno = (value: string) => {
     setAno(value);
   };
 
   const handleSetInputText_Descricao = (value: string) => {
-    let model = new MovimentacoesModel();
     setMovimentacoesModel({
       ...movimentacoesModel,
       Descricao: value,
@@ -189,37 +291,44 @@ function Movimentacoes() {
 
   const handleSetInputText_Valor = (value: string) => {
     const val = maskCurrency(value == "" ? "0" : value);
+    setValorMask(maskCurrency(val));
     setMovimentacoesModel({
       ...movimentacoesModel,
-      Valor: val,
+      Valor: parseFloat(val.replace(",", "").replace(",", ".")),
     });
   };
 
   const handleSetInputText_UsuarioId = (value: string) => {
-    setMovimentacoesCompartilhadasModel({
-      ...movimentacoesCompartilhadasModel,
-      UsuarioId: parseInt(value),
+    setMovimentacoesModel({
+      ...movimentacoesModel,
+      UsuarioMovimentacaoCompartilhadaId: parseInt(value),
     });
   };
 
   const handleSetInputText_DataMovimentacao = (value: string) => {
     setMovimentacoesModel({
       ...movimentacoesModel,
-      DataMovimentacao: covertDateYYYYmmdd(value),
+      DataMovimentacao: new Date(covertDateYYYYmmdd(value)),
     });
   };
 
   return (
     <Grid container spacing={1}>
+      <AlertDialog
+        text={"Tem certeza que deseja remover este item?"}
+        returnDialog={trataRetornoDialogRemove}
+        open={dialogOpen}
+      />
+
       <Msg
         desc={msgShowSuccess}
-        active={active}
+        active={activeShowSuccess}
         handleClose={closeMsgSucces}
         type="success"
       />
       <Msg
         desc={msgShowError}
-        active={active}
+        active={activeShowError}
         handleClose={closeMsgError}
         type="error"
       />
@@ -297,28 +406,6 @@ function Movimentacoes() {
                   { Value: "12", Desc: "Dezembro" },
                 ]}
               />
-              {/* <InputLabel id="demo-simple-select-helper-label">Mês</InputLabel>
-              <select
-                value={mes}
-                id="mes"
-                onChange={(e) => {
-                  handleChangeMes(e);
-                }}
-              >
-                <option value=""></option>
-                <option value={"01"}>Janeiro</option>
-                <option value={"02"}>Fevereiro</option>
-                <option value={"03"}>Março</option>
-                <option value={"04"}>Abril</option>
-                <option value={"05"}>Maio</option>
-                <option value={"06"}>Junho</option>
-                <option value={"07"}>Julho</option>
-                <option value={"08"}>Agosto</option>
-                <option value={"09"}>Setembro</option>
-                <option value={"10"}>Outrubro</option>
-                <option value={"11"}>Novembro</option>
-                <option value={"12"}>Dezembro</option>
-              </select> */}
             </FormControl>
             <Button
               type="submit"
@@ -395,10 +482,38 @@ function Movimentacoes() {
                         <TableCell key={`th-Valor-${row.Id}`} align="right">
                           {NumberToCurrecy(parseFloat(row.Valor))}
                         </TableCell>
-                        <TableCell
-                          key={`th-acao-${row.Id}`}
-                          align="right"
-                        ></TableCell>
+                        <TableCell key={`th-acao-${row.Id}`} align="right">
+                          {!row.MovimentacaoCompartilhada ? (
+                            <Button
+                              variant="contained"
+                              color="info"
+                              onClick={() => handleOpenEdit(row)}
+                              className={"btnCircleEdit"}
+                            >
+                              <EditIcon />
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="contained"
+                              color="info"
+                              disabled
+                              title="Não é possível editar uma movimentação compartilhada, remova e adicione novamente"
+                              onClick={() => handleOpenEdit(row)}
+                              className={"btnCircleEdit"}
+                            >
+                              <EditIcon />
+                            </Button>
+                          )}
+
+                          <Button
+                            variant="contained"
+                            color="error"
+                            onClick={() => handleOpenRemove(row)}
+                            className={"btnCircleRemove"}
+                          >
+                            <RemoveIcon />
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     ))
                   ) : (
@@ -436,7 +551,11 @@ function Movimentacoes() {
 
                   <form
                     className="mt-8 space-y-6 form-modal"
-                    onSubmit={handleSubmit(cadastrarMovimentacao)}
+                    onSubmit={handleSubmit(
+                      addMovimentacao
+                        ? cadastrarMovimentacao
+                        : alterarMovimentacao
+                    )}
                   >
                     <Grid container spacing={3}>
                       <Grid item xs={6} md={6} lg={6}>
@@ -445,28 +564,13 @@ function Movimentacoes() {
                             <TextInput
                               id={"descricao"}
                               type={"text"}
+                              required={true}
                               placeholder={"Descrição"}
                               value={movimentacoesModel?.Descricao}
                               handleChangeTextInput={
                                 handleSetInputText_Descricao
                               }
                             />
-                            {/* <TextField
-                              id="descricao"
-                              label="Descrição"
-                              variant="outlined"
-                              type="text"
-                              className={styles.input12}
-                              value={movimentacoesModel?.Descricao}
-                              required
-                              onChange={(e) => {
-                                let model = new MovimentacoesModel();
-                                setMovimentacoesModel({
-                                  ...movimentacoesModel,
-                                  Descricao: e.target.value,
-                                });
-                              }}
-                            /> */}
                           </div>
                         </div>
                       </Grid>
@@ -476,26 +580,13 @@ function Movimentacoes() {
                             <TextInput
                               id={"valor"}
                               type={"text"}
+                              required={true}
                               placeholder={"Valor"}
-                              value={movimentacoesModel?.Valor}
-                              handleChangeTextInput={handleSetInputText_Valor}
-                            />
-                            {/* <TextField
-                              id="valor"
-                              label="Valor"
-                              variant="outlined"
-                              type="number"
-                              autoComplete="current-password"
-                              className={styles.input12}
-                              value={movimentacoesModel?.Valor}
-                              required
-                              onChange={(e) => {
-                                setMovimentacoesModel({
-                                  ...movimentacoesModel,
-                                  Valor: e.target.value,
-                                });
+                              value={valorMask}
+                              handleChangeTextInput={(e) => {
+                                handleSetInputText_Valor(e);
                               }}
-                            /> */}
+                            />
                           </div>
                         </div>
                       </Grid>
@@ -505,36 +596,17 @@ function Movimentacoes() {
                             <TextInput
                               id={"dataMovimetacao"}
                               type={"date"}
+                              required={true}
                               placeholder={"Data Movimentação"}
-                              value={
-                                movimentacoesModel?.DataMovimentacao == ""
+                              value={covertDateYYYYmmdd(
+                                movimentacoesModel?.DataMovimentacao == null
                                   ? getDateYYYYmmdd()
                                   : movimentacoesModel.DataMovimentacao
-                              }
+                              )}
                               handleChangeTextInput={
                                 handleSetInputText_DataMovimentacao
                               }
                             />
-                            {/* <TextField
-                              id="dataMovimetacao"
-                              label="Data Movimentação"
-                              variant="outlined"
-                              type="date"
-                              value={
-                                movimentacoesModel?.DataMovimentacao == ""
-                                  ? getDateYYYYmmdd()
-                                  : movimentacoesModel.DataMovimentacao
-                              }
-                              required
-                              onChange={(e) => {
-                                setMovimentacoesModel({
-                                  ...movimentacoesModel,
-                                  DataMovimentacao: covertDateYYYYmmdd(
-                                    e.target.value
-                                  ),
-                                });
-                              }}
-                            /> */}
                           </div>
                         </div>
                       </Grid>
@@ -543,10 +615,10 @@ function Movimentacoes() {
                           <div>
                             <SelectInput
                               id={"tipoAcao"}
-                              type={"text"}
                               placeholder={"Tipo"}
                               keyDesc={"Desc"}
                               keyValue={"Value"}
+                              required={true}
                               value={movimentacoesModel?.TipoAcaoId}
                               handleChangeTextInput={
                                 handleSetInputText_TipoAcao
@@ -556,28 +628,6 @@ function Movimentacoes() {
                                 { Value: 2, Desc: "Saída" },
                               ]}
                             />
-                            {/* <select
-                              id="tipoAcao"
-                              className={styles.input12}
-                              value={movimentacoesModel?.TipoAcaoId}
-                              required
-                              onChange={(e) => {
-                                debugger;
-                                const target = parseInt(
-                                  e.target.value.toString()
-                                );
-                                setMovimentacoesModel({
-                                  ...movimentacoesModel,
-                                  TipoAcaoId: target,
-                                });
-                              }}
-                            >
-                              <option defaultChecked value={0}>
-                                Selecione uma opção
-                              </option>
-                              <option value={1}>Entrada</option>
-                              <option value={2}>Saída</option>
-                            </select> */}
                           </div>
                         </div>
                       </Grid>
@@ -590,65 +640,51 @@ function Movimentacoes() {
                                   <div>
                                     <label>Compartilhar Saida</label>
                                     <Switch
-                                      checked={compartilharSaida}
+                                      checked={
+                                        movimentacoesModel.MovimentacaoCompartilhada
+                                      }
                                       onChange={(e) => {
-                                        setCompartilharSaida(e.target.checked);
-                                      }}
-                                    />
-                                  </div>
-                                </div>
-                              </Grid>
-                              <Grid item xs={6} md={6} lg={6}>
-                                <div className="rounded-md shadow-sm -space-y-px">
-                                  <div>
-                                    <SelectInput
-                                      id={"movimentacoesCompartilhadaUsuarioId"}
-                                      type={"text"}
-                                      placeholder={
-                                        "Movimentações Compartilhadas"
-                                      }
-                                      keyDesc={"Nome"}
-                                      keyValue={"Id"}
-                                      value={
-                                        movimentacoesCompartilhadasModel.UsuarioId ??
-                                        ""
-                                      }
-                                      handleChangeTextInput={
-                                        handleSetInputText_UsuarioId
-                                      }
-                                      listOpts={listUsuarios}
-                                    />
-                                    {/* <select
-                                      value={
-                                        movimentacoesCompartilhadasModel.UsuarioId ??
-                                        0
-                                      }
-                                      id="movimentacoesCompartilhadaUsuarioId"
-                                      className={styles.input12}
-                                      onChange={(e) => {
-                                        setMovimentacoesCompartilhadasModel({
-                                          ...movimentacoesCompartilhadasModel,
-                                          UsuarioId: parseInt(
-                                            e.target.value.toString()
-                                          ),
+                                        debugger;
+                                        setMovimentacoesModel({
+                                          ...movimentacoesModel,
+                                          MovimentacaoCompartilhada:
+                                            e.target.checked,
                                         });
                                       }}
-                                    >
-                                      <option key={0} value={0}>
-                                        Selecione uma opção
-                                      </option>
-                                      {listUsuarios.map((item) => (
-                                        <option
-                                          key={item.Id}
-                                          value={parseInt(item.Id)}
-                                        >
-                                          {item.Nome}
-                                        </option>
-                                      ))}
-                                    </select> */}
+                                    />
                                   </div>
                                 </div>
                               </Grid>
+                              {movimentacoesModel.MovimentacaoCompartilhada ? (
+                                <Grid item xs={6} md={6} lg={6}>
+                                  <div className="rounded-md shadow-sm -space-y-px">
+                                    <div>
+                                      <SelectInput
+                                        id={
+                                          "movimentacoesCompartilhadaUsuarioId"
+                                        }
+                                        type={"text"}
+                                        placeholder={
+                                          "Movimentações Compartilhadas"
+                                        }
+                                        keyDesc={"Nome"}
+                                        required={true}
+                                        keyValue={"Id"}
+                                        value={
+                                          movimentacoesModel.UsuarioMovimentacaoCompartilhadaId ??
+                                          ""
+                                        }
+                                        handleChangeTextInput={
+                                          handleSetInputText_UsuarioId
+                                        }
+                                        listOpts={listUsuarios}
+                                      />
+                                    </div>
+                                  </div>
+                                </Grid>
+                              ) : (
+                                <></>
+                              )}
                             </>
                           );
                         }

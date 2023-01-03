@@ -13,7 +13,7 @@ function TextInput(props: any) {
       type={type}
       className={"input-text-custom"}
       value={value}
-      required={required ?? false}
+      required={required}
       onChange={(e) => {
         change(e.target.value);
       }}

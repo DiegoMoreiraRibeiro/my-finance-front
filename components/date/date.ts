@@ -17,6 +17,13 @@ export function getDateYYYYmmdd() {
   return date.getFullYear() + "-" + month + "-" + day;
 }
 
+export function convertDateYYYYmmdd(dt: string) {
+  const date = new Date(dt);
+  const month = zeroPad(date.getMonth() + 1, 2);
+  const day = zeroPad(date.getDate(), 2);
+  return date.getFullYear() + "-" + month + "-" + day;
+}
+
 export function covertDateYYYYmmdd(dateParam: Date | string) {
   let date_;
   if (typeof dateParam == "string") {

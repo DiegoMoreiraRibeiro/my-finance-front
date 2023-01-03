@@ -88,6 +88,9 @@ export default function Index() {
 
       <Grid item sm={12} className={"dividerBr"}></Grid>
       <Grid item xs={4} md={4} lg={4} sm={12} className="containerLogin">
+        <span>
+          <p>Ambiente: {process.env.AMBIENTE}</p>
+        </span>
         <LockPersonIcon
           sx={{
             fontSize: 100,
