@@ -1,37 +1,23 @@
-FROM node:12.8-alpine as test-target
-ENV NODE_ENV=development
-ENV PATH $PATH:/usr/src/app/node_modules/.bin
+FROM node:lts as dependencies
+WORKDIR /my-project
+COPY package.json yarn.lock ./
+RUN npm install --frozen-lockfile
 
-WORKDIR /usr/src/app
-
-COPY package*.json ./
-
-# CI and release builds should use npm ci to fully respect the lockfile.
-# Local development may use npm install for opportunistic package updates.
-ARG npm_install_command=ci
-RUN npm $npm_install_command
-
+FROM node:lts as builder
+WORKDIR /my-project
 COPY . .
-
-# Build
-FROM test-target as build-target
-ENV NODE_ENV=production
-
-# Use build tools, installed as development packages, to produce a release build.
+COPY --from=dependencies /my-project/node_modules ./node_modules
 RUN npm run build
 
-# Reduce installed packages to production-only.
-RUN npm prune --production
+FROM node:lts as runner
+WORKDIR /my-project
+ENV NODE_ENV production
+# If you are using a custom next.config.js file, uncomment this line.
+# COPY --from=builder /my-project/next.config.js ./
+COPY --from=builder /my-project/public ./public
+COPY --from=builder /my-project/.next ./.next
+COPY --from=builder /my-project/node_modules ./node_modules
+COPY --from=builder /my-project/package.json ./package.json
 
-# Archive
-FROM node:12.8-alpine as archive-target
-ENV NODE_ENV=production
-ENV PATH $PATH:/usr/src/app/node_modules/.bin
-
-WORKDIR /usr/src/app
-
-# Include only the release build and production packages.
-COPY --from=build-target /usr/src/app/node_modules node_modules
-COPY --from=build-target /usr/src/app/.next .next
-
-CMD ["next", "start"]
+EXPOSE 3000
+CMD ["npm", "run", "start"]
