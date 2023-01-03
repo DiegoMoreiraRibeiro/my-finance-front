@@ -84,14 +84,24 @@
   margin-top: 20px !important;
 }
 
+.gridContainerDash {
+  display: flex !important;
+  margin-top: 20px !important;
+}
+
+.gridContainerReport {
+  display: flex !important;
+  margin-top: 70px !important;
+}
+
 .lbValor {
   font-size: 36px !important;
   font-weight: bold !important;
 }
 
 .btnPesquisar {
-  margin: 10px !important;
-  height: 50px !important;
+  margin: 7px !important;
+  height: 35px !important;
   width: 150px !important;
 }
 
@@ -184,28 +194,28 @@
 }
 
 .btnCircleEdit {
-  background-color: #44c767;
-  border-radius: 34px;
-  display: inline-block;
-  cursor: pointer;
-  color: #ffffff;
-  font-family: Arial;
-  font-size: 8px;
-  padding: 5px 0px;
-  text-decoration: none;
+  background-color: #44c767 !important;
+  border-radius: 34px !important;
+  display: inline-block !important;
+  cursor: pointer !important;
+  color: #ffffff !important;
+  font-family: Arial !important;
+  font-size: 8px !important;
+  padding: 5px 0px !important;
+  text-decoration: none !important;
 }
 
 .btnCircleRemove {
-  background-color: #d43c00;
-  border-radius: 34px;
-  display: inline-block;
-  cursor: pointer;
-  color: #ffffff;
-  font-family: Arial;
-  font-size: 8px;
-  padding: 5px 0px;
-  text-decoration: none;
-  margin-left: 5px;
+  background-color: #d43c00 !important;
+  border-radius: 34px !important;
+  display: inline-block !important;
+  cursor: pointer !important;
+  color: #ffffff !important;
+  font-family: Arial !important;
+  font-size: 8px !important;
+  padding: 5px 0px !important;
+  text-decoration: none !important;
+  margin-left: 5px !important;
 }
 
 .containerModal {
@@ -219,9 +229,12 @@
 .containerLogin {
   margin: auto !important;
   padding: 20px !important;
-  background-color: rgb(218, 218, 218) !important;
+  background-color: rgb(238, 238, 238) !important;
   border-radius: 10px !important;
   border: 1px solid rgb(226, 226, 226) !important;
+  -webkit-box-shadow: 10px 13px 5px -10px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: 10px 13px 5px -10px rgba(0, 0, 0, 0.75);
+  box-shadow: 10px 13px 5px -10px rgba(0, 0, 0, 0.75);
 }
 
 .inputLogin {

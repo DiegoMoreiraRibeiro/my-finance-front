@@ -18,8 +18,8 @@ export default function Index() {
 
   const [active, setActive] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState("dimoreira.dev@gmail.com");
-  const [senha, setSenha] = useState("123");
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
 
   useEffect(() => {
     clearCokies();
@@ -35,6 +35,7 @@ export default function Index() {
     };
     let ret = await signIn(data);
 
+    debugger;
     if (!ret) {
       setActive(true);
     } else {
@@ -88,9 +89,6 @@ export default function Index() {
 
       <Grid item sm={12} className={"dividerBr"}></Grid>
       <Grid item xs={4} md={4} lg={4} sm={12} className="containerLogin">
-        <span>
-          <p>Ambiente: {process.env.AMBIENTE}</p>
-        </span>
         <LockPersonIcon
           sx={{
             fontSize: 100,
@@ -109,7 +107,7 @@ export default function Index() {
               placeholder={"Email"}
               value={email}
               require={true}
-              handleChangeTextInput={(e) => setEmail(e.target.value)}
+              handleChangeTextInput={(e) => setEmail(e)}
             />
           </Grid>
           <br />
@@ -120,7 +118,7 @@ export default function Index() {
               placeholder={"Senha"}
               value={senha}
               require={true}
-              handleChangeTextInput={(e) => setSenha(e.target.value)}
+              handleChangeTextInput={(e) => setSenha(e)}
             />
           </Grid>
 

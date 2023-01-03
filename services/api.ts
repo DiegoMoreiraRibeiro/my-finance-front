@@ -55,6 +55,30 @@ export async function Post(
   }
 }
 
+export async function PostAuth(
+  method: string,
+  data: any | null
+): Promise<AxiosResponse<any, any> | any> {
+  try {
+    const { "nextauth.token": token } = parseCookies();
+    if (token != null && token != "") {
+      api.defaults.headers["Authorization"] = `Bearer ${token}`;
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+      return await axios.post(BASE_URL + method, data, {
+        headers,
+      });
+    } else {
+      return await axios.post(BASE_URL + method, data);
+    }
+  } catch (error: any) {
+    if (error.response.status == 401) {
+      return null;
+    }
+  }
+}
+
 export async function Delete(
   method: string,
   params?: string | null | undefined

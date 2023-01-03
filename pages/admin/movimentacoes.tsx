@@ -53,6 +53,8 @@ import AlertDialog from "../../components/utils/Dialog";
 
 function Movimentacoes() {
   const { "nextauth.id": id } = parseCookies();
+  const { "nextauth.token": token } = parseCookies();
+
   const { handleSubmit } = useForm();
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -67,7 +69,7 @@ function Movimentacoes() {
 
   const [valorMask, setValorMask] = useState("0");
   const [rowsMovimentacoes, setRowsMovimentacoes] = useState([]);
-  const [valorEntrada, setValorEntrada] = useState("0");
+  const [valorEntrada, setValorEntrada] = useState(0);
   const [valorSaida, setValorSaida] = useState(0);
   const [ano, setAno] = React.useState("");
   const [listAnos, setListAnos] = useState([{ Ano: 2022 }]);
@@ -92,7 +94,6 @@ function Movimentacoes() {
   };
 
   const handleOpenEdit = (row) => {
-    debugger;
     setAddMovimentacao(false);
     setMovimentacoesModel({
       UsuarioId: parseInt(id),
@@ -110,13 +111,11 @@ function Movimentacoes() {
   };
 
   const handleOpenRemove = (row) => {
-    debugger;
     setDialogOpen(true);
     setDialogRemoveId(row.Id);
   };
 
   async function trataRetornoDialogRemove(tipo) {
-    debugger;
     if (tipo) {
       await removeMovimentacao(dialogRemoveId);
     } else {
@@ -138,8 +137,11 @@ function Movimentacoes() {
   //#endregion
 
   useEffect(() => {
-    listarMovimentacoes(null, null);
-    listarUsuarios();
+    if (token && token != "") {
+      listarMovimentacoes(null, null);
+      listarUsuarios();
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -160,8 +162,8 @@ function Movimentacoes() {
     );
 
     if (ret.status == 200) {
-      setValorEntrada(ret.data.Entrada.toString());
-      setValorSaida(ret.data.Saida.toString());
+      setValorEntrada(ret.data.Entrada);
+      setValorSaida(ret.data.Saida);
       setRowsMovimentacoes(ret.data.Movimentacao);
     }
   }
@@ -197,7 +199,6 @@ function Movimentacoes() {
   }
 
   async function alterarMovimentacao() {
-    debugger;
     let obj = movimentacoesModel;
     obj.Valor = parseFloat(valorMask.replace(".", "").replace(",", "."));
 
@@ -235,7 +236,6 @@ function Movimentacoes() {
   }
 
   async function cadastrarMovimentacao() {
-    debugger;
     let obj = movimentacoesModel;
     obj.Valor = parseFloat(valorMask.replace(".", "").replace(",", "."));
     if (obj.MovimentacaoCompartilhada) {
@@ -244,7 +244,6 @@ function Movimentacoes() {
     }
     const ret = await Post("movimentacao", obj);
 
-    debugger;
     if (ret.status == 201) {
       showMsgSuccess("Movimentação cadastrada com sucesso!");
 
@@ -351,11 +350,15 @@ function Movimentacoes() {
 
           <div className={"gridContainer"}>
             <Grid item xs={6} md={6} lg={6} className={"gridEntrada"}>
-              <div className={"lbValor"}>{NumberToCurrecy(valorEntrada)}</div>
+              <div className={"lbValor"}>
+                {valorEntrada == 0 ? "R$ 0,00" : NumberToCurrecy(valorEntrada)}
+              </div>
               <span>Entrada / Mês</span>
             </Grid>
             <Grid item xs={6} md={6} lg={6} className={"gridSaida"}>
-              <div className={"lbValor"}>{NumberToCurrecy(valorSaida)}</div>
+              <div className={"lbValor"}>
+                {valorSaida == 0 ? "R$ 0,00" : NumberToCurrecy(valorSaida)}
+              </div>
               <span>Saída / Mês</span>
             </Grid>
           </div>
@@ -372,15 +375,6 @@ function Movimentacoes() {
                 handleChangeTextInput={handleChangeAno}
                 listOpts={listAnos}
               />
-              {/* <InputLabel id="demo-simple-select-helper-label">Ano</InputLabel>
-              <select id="ano" value={ano} onChange={handleChangeAno}>
-                <option value={""}>Selecione um ano</option>
-                {listAnos.map((item) => (
-                  <option key={item} value={item}>
-                    {item}
-                  </option>
-                ))}
-              </select> */}
             </FormControl>
             <FormControl sx={{ m: 1, minWidth: 120 }}>
               <SelectInput
@@ -493,16 +487,17 @@ function Movimentacoes() {
                               <EditIcon />
                             </Button>
                           ) : (
-                            <Button
-                              variant="contained"
-                              color="info"
-                              disabled
-                              title="Não é possível editar uma movimentação compartilhada, remova e adicione novamente"
-                              onClick={() => handleOpenEdit(row)}
-                              className={"btnCircleEdit"}
-                            >
-                              <EditIcon />
-                            </Button>
+                            <></>
+                            // <Button
+                            //   variant="contained"
+                            //   color="info"
+                            //   disabled
+                            //   title="Não é possível editar uma movimentação compartilhada, remova e adicione novamente"
+                            //   onClick={() => handleOpenEdit(row)}
+                            //   className={"btnCircleEdit"}
+                            // >
+                            //   <EditIcon />
+                            // </Button>
                           )}
 
                           <Button
@@ -632,7 +627,10 @@ function Movimentacoes() {
                         </div>
                       </Grid>
                       {(() => {
-                        if (movimentacoesModel.TipoAcaoId == 2) {
+                        if (
+                          addMovimentacao &&
+                          movimentacoesModel.TipoAcaoId == 2
+                        ) {
                           return (
                             <>
                               <Grid item xs={6} md={6} lg={6}>
@@ -644,7 +642,6 @@ function Movimentacoes() {
                                         movimentacoesModel.MovimentacaoCompartilhada
                                       }
                                       onChange={(e) => {
-                                        debugger;
                                         setMovimentacoesModel({
                                           ...movimentacoesModel,
                                           MovimentacaoCompartilhada:
@@ -692,7 +689,6 @@ function Movimentacoes() {
                     </Grid>
 
                     <div className="flex items-right justify-between div-modal-btns">
-                      <br />
                       <Button
                         type="button"
                         variant="outlined"

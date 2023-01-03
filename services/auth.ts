@@ -1,5 +1,5 @@
 import { v4 as uuid } from "uuid";
-import { api, Post } from "./api";
+import { api, Post, PostAuth } from "./api";
 
 type SignInRequestData = {
   email: string;
@@ -13,8 +13,14 @@ export async function signInRequest(data: SignInRequestData) {
   await delay();
   let objRet = null;
 
-  const response = await Post("login/auth", data);
-  if (response.status == 201) {
+  const response = await PostAuth("login/auth", data);
+
+  if (response == null) {
+    objRet = {
+      token: null,
+      user: null,
+    };
+  } else if (response?.status == 201) {
     objRet = {
       token: response.data.access_token,
       user: {
@@ -25,24 +31,6 @@ export async function signInRequest(data: SignInRequestData) {
       },
     };
   }
-
-  // await axios
-  //   .post("http://localhost:3300/api/login/auth", data)
-  //   .then((response) => {
-  //     if (response.status == 201) {
-  //       objRet = {
-  //         token: response.data.access_token,
-  //         user: {
-  //           name: response.data.nome,
-  //           email: response.data.email,
-  //           avatar_url: "",
-  //         },
-  //       };
-  //     }
-  //   })
-  //   .catch((error) => {
-  //     console.error("There was an error!", error);
-  //   });
 
   if (objRet != null) {
     return objRet;
@@ -60,14 +48,12 @@ export async function signInRequest(data: SignInRequestData) {
 }
 
 export async function recoverUserInformation() {
-  await delay();
-
   return {
     user: {
       id: 0,
-      name: "Diego Fernandes",
-      email: "diego@rocketseat.com.br",
-      avatar_url: "https://github.com/diego3g.png",
+      name: "",
+      email: "",
+      avatar_url: "",
     },
   };
 }

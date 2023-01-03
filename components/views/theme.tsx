@@ -19,8 +19,17 @@ import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { mainListItems } from "../../components/views/listItems";
-
+import Avatar from "@mui/material/Avatar";
+import Tooltip from "@mui/material/Tooltip";
+import Menu from "@mui/material/Menu";
 import { ReactElement } from "react";
+import MenuItem from "@mui/material/MenuItem";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import PersonAdd from "@mui/icons-material/PersonAdd";
+import Settings from "@mui/icons-material/Settings";
+import Logout from "@mui/icons-material/Logout";
+import { parseCookies, setCookie } from "nookies";
+import Router from "next/router";
 
 function Copyright(props: any) {
   return (
@@ -32,7 +41,7 @@ function Copyright(props: any) {
     >
       {"Copyright © "}
       <Link color="inherit" href="https://mui.com/">
-        Your Website
+        Meu Financeiro
       </Link>{" "}
       {new Date().getFullYear()}
       {"."}
@@ -93,6 +102,15 @@ const Drawer = styled(MuiDrawer, {
 const mdTheme = createTheme();
 
 const Theme = (props: any) => {
+  const { "nextauth.token": token } = parseCookies();
+  const { "nextauth.email": email } = parseCookies();
+
+  useEffect(() => {
+    if (token == "" || token == undefined) {
+      Router.push("/");
+    }
+  }, [token]);
+
   const Page = () => {
     return props.children;
   };
@@ -101,6 +119,38 @@ const Theme = (props: any) => {
   const toggleDrawer = () => {
     setOpen(!open);
   };
+
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const openMenu = Boolean(anchorEl);
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const sair = () => {
+    debugger;
+    Router.push("/");
+    deleteAllCookies();
+  };
+
+  function deleteAllCookies() {
+    setCookie(undefined, "nextauth.token", "");
+    setCookie(undefined, "nextauth.id", "");
+    setCookie(undefined, "nextauth.email", "");
+    setCookie(undefined, "nextauth.email", "");
+
+    const cookies = document.cookie.split(";");
+
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i];
+      const eqPos = cookie.indexOf("=");
+      const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    }
+  }
 
   return (
     <ThemeProvider theme={mdTheme}>
@@ -131,15 +181,90 @@ const Theme = (props: any) => {
               noWrap
               sx={{ flexGrow: 1 }}
             >
-              Dashboard
+              MeuFinanceiro
             </Typography>
             <IconButton color="inherit">
               <Badge badgeContent={4} color="secondary">
                 <NotificationsIcon />
               </Badge>
             </IconButton>
+            <Tooltip title="Menu">
+              <IconButton
+                onClick={handleClick}
+                size="small"
+                sx={{ ml: 2 }}
+                aria-controls={openMenu ? "account-menu" : undefined}
+                aria-haspopup="true"
+                aria-expanded={openMenu ? "true" : undefined}
+              >
+                <Avatar sx={{ width: 32, height: 32 }}>
+                  {email.slice(0, 2).toLocaleUpperCase()}
+                </Avatar>
+              </IconButton>
+            </Tooltip>
           </Toolbar>
         </AppBar>
+        <Menu
+          anchorEl={anchorEl}
+          id="account-menu"
+          open={openMenu}
+          onClose={handleClose}
+          onClick={handleClose}
+          PaperProps={{
+            elevation: 0,
+            sx: {
+              overflow: "visible",
+              filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+              mt: 1.5,
+              "& .MuiAvatar-root": {
+                width: 32,
+                height: 32,
+                ml: -0.5,
+                mr: 1,
+              },
+              "&:before": {
+                content: '""',
+                display: "block",
+                position: "absolute",
+                top: 0,
+                right: 14,
+                width: 10,
+                height: 10,
+                bgcolor: "background.paper",
+                transform: "translateY(-50%) rotate(45deg)",
+                zIndex: 0,
+              },
+            },
+          }}
+          transformOrigin={{ horizontal: "right", vertical: "top" }}
+          anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+        >
+          <MenuItem>
+            <Avatar /> Perfil
+          </MenuItem>
+          <MenuItem>
+            <Avatar /> Minha conta
+          </MenuItem>
+          <Divider />
+          {/* <MenuItem>
+            <ListItemIcon>
+              <PersonAdd fontSize="small" />
+            </ListItemIcon>
+            Add another account
+          </MenuItem> */}
+          <MenuItem>
+            <ListItemIcon>
+              <Settings fontSize="small" />
+            </ListItemIcon>
+            Configurações
+          </MenuItem>
+          <MenuItem onClick={sair}>
+            <ListItemIcon>
+              <Logout fontSize="small" />
+            </ListItemIcon>
+            Sair
+          </MenuItem>
+        </Menu>
         <Drawer variant="permanent" open={open}>
           <Toolbar
             sx={{
