@@ -38,6 +38,7 @@
   },
   "scripts": {
     "dev": "next dev",
+    "build": "set NODE_ENV=production && next build",
     "build:prd": "set NODE_ENV=production && next build",
     "build:dev": "set NODE_ENV=development && next build",
     "start:prd": "set NODE_ENV=production && next start",
