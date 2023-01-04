@@ -9,6 +9,7 @@ function TextInput(props: any) {
   return (
     <input
       id={id}
+      autoFocus
       placeholder={placeholder}
       type={type}
       className={"input-text-custom"}

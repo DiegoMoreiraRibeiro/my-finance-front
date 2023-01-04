@@ -35,7 +35,6 @@ export default function Index() {
     };
     let ret = await signIn(data);
 
-    debugger;
     if (!ret) {
       setActive(true);
     } else {
@@ -88,7 +87,7 @@ export default function Index() {
       />
 
       <Grid item sm={12} className={"dividerBr"}></Grid>
-      <Grid item xs={4} md={4} lg={4} sm={12} className="containerLogin">
+      <Grid item xs={10} md={4} lg={4} sm={12} className="containerLogin">
         <LockPersonIcon
           sx={{
             fontSize: 100,

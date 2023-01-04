@@ -71,8 +71,10 @@ export function AuthProvider({ children, ...props }: Props) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, signIn }}>
-      {children}
-    </AuthContext.Provider>
+    <>
+      <AuthContext.Provider value={{ user, isAuthenticated, signIn }}>
+        {children}
+      </AuthContext.Provider>
+    </>
   );
 }

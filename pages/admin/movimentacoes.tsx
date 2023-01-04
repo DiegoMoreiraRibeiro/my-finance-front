@@ -50,6 +50,7 @@ import TextInput from "../../components/inputs/text-input";
 import SelectInput from "../../components/inputs/select-input";
 import { maskCurrency } from "../../components/utils/mask";
 import AlertDialog from "../../components/utils/Dialog";
+import dynamic from "next/dynamic";
 
 function Movimentacoes() {
   const { "nextauth.id": id } = parseCookies();
@@ -71,8 +72,8 @@ function Movimentacoes() {
   const [rowsMovimentacoes, setRowsMovimentacoes] = useState([]);
   const [valorEntrada, setValorEntrada] = useState(0);
   const [valorSaida, setValorSaida] = useState(0);
-  const [ano, setAno] = React.useState("");
-  const [listAnos, setListAnos] = useState([{ Ano: 2022 }]);
+  const [ano, setAno] = React.useState("2023");
+  const [listAnos, setListAnos] = useState([{ Ano: 2023 }]);
   const [mes, setMes] = React.useState("");
   const [msgShowSuccess, setMsgShowSuccess] = React.useState("");
   const [msgShowError, setMsgShowError] = React.useState("");
@@ -137,13 +138,17 @@ function Movimentacoes() {
   //#endregion
 
   useEffect(() => {
-    if (token && token != "") {
-      listarMovimentacoes(null, null);
-      listarUsuarios();
-    }
-
+    listarMovimentacoes(null, null);
+    listarUsuarios();
+    salvarMesAnoAtual();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  function salvarMesAnoAtual() {
+    const mesAtual = new Date().getMonth() + 1;
+    const mesAtualText = mesAtual <= 9 ? "0" + mesAtual : mesAtual.toString();
+    setMes(mesAtualText);
+  }
 
   async function listarMovimentacoes(
     mes: string | null,
@@ -312,424 +317,425 @@ function Movimentacoes() {
   };
 
   return (
-    <Grid container spacing={1}>
-      <AlertDialog
-        text={"Tem certeza que deseja remover este item?"}
-        returnDialog={trataRetornoDialogRemove}
-        open={dialogOpen}
-      />
+    <>
+      <Grid container spacing={1}>
+        <AlertDialog
+          text={"Tem certeza que deseja remover este item?"}
+          returnDialog={trataRetornoDialogRemove}
+          open={dialogOpen}
+        />
 
-      <Msg
-        desc={msgShowSuccess}
-        active={activeShowSuccess}
-        handleClose={closeMsgSucces}
-        type="success"
-      />
-      <Msg
-        desc={msgShowError}
-        active={activeShowError}
-        handleClose={closeMsgError}
-        type="error"
-      />
-      <Grid item xs={12} md={12} lg={12}>
-        <Paper
-          sx={{
-            p: 1,
-            display: "flex",
-            flexDirection: "column",
-            height: "auto",
-            width: "100%",
-          }}
-        >
-          <Breadcrumbs aria-label="breadcrumb">
-            <Link underline="hover" color="inherit" href="/admin/dashboard">
-              Admin
-            </Link>
-            <Typography color="text.primary">Movimentações</Typography>
-          </Breadcrumbs>
+        <Msg
+          desc={msgShowSuccess}
+          active={activeShowSuccess}
+          handleClose={closeMsgSucces}
+          type="success"
+        />
+        <Msg
+          desc={msgShowError}
+          active={activeShowError}
+          handleClose={closeMsgError}
+          type="error"
+        />
+        <Grid item xs={12} md={12} lg={12}>
+          <Paper
+            sx={{
+              p: 1,
+              display: "flex",
+              flexDirection: "column",
+              height: "auto",
+              width: "100%",
+            }}
+          >
+            <Breadcrumbs aria-label="breadcrumb">
+              <Link underline="hover" color="inherit" href="/admin/dashboard">
+                Admin
+              </Link>
+              <Typography color="text.primary">Movimentações</Typography>
+            </Breadcrumbs>
 
-          <div className={"gridContainer"}>
-            <Grid item xs={6} md={6} lg={6} className={"gridEntrada"}>
-              <div className={"lbValor"}>
-                {valorEntrada == 0 ? "R$ 0,00" : NumberToCurrecy(valorEntrada)}
-              </div>
-              <span>Entrada / Mês</span>
-            </Grid>
-            <Grid item xs={6} md={6} lg={6} className={"gridSaida"}>
-              <div className={"lbValor"}>
-                {valorSaida == 0 ? "R$ 0,00" : NumberToCurrecy(valorSaida)}
-              </div>
-              <span>Saída / Mês</span>
-            </Grid>
-          </div>
+            <div className={"gridContainer"}>
+              <Grid item xs={6} md={6} lg={6} className={"gridEntrada"}>
+                <div className={"lbValor"}>
+                  {valorEntrada == 0
+                    ? "R$ 0,00"
+                    : NumberToCurrecy(valorEntrada)}
+                </div>
+                <span>Entrada / Mês</span>
+              </Grid>
+              <Grid item xs={6} md={6} lg={6} className={"gridSaida"}>
+                <div className={"lbValor"}>
+                  {valorSaida == 0 ? "R$ 0,00" : NumberToCurrecy(valorSaida)}
+                </div>
+                <span>Saída / Mês</span>
+              </Grid>
+            </div>
 
-          <div className={"divBtnPesquisa"}>
-            <FormControl sx={{ m: 1, minWidth: 120 }}>
-              <SelectInput
-                id={"Ano"}
-                type={"text"}
-                placeholder={"Ano"}
-                keyDesc={"Ano"}
-                keyValue={"Ano"}
-                value={ano ?? ""}
-                handleChangeTextInput={handleChangeAno}
-                listOpts={listAnos}
-              />
-            </FormControl>
-            <FormControl sx={{ m: 1, minWidth: 120 }}>
-              <SelectInput
-                id={"mes"}
-                type={"text"}
-                placeholder={"Mês"}
-                keyDesc={"Desc"}
-                keyValue={"Value"}
-                value={mes ?? ""}
-                handleChangeTextInput={handleChangeMes}
-                listOpts={[
-                  { Value: "01", Desc: "Janeiro" },
-                  { Value: "02", Desc: "Fevereiro" },
-                  { Value: "03", Desc: "Março" },
-                  { Value: "04", Desc: "Abril" },
-                  { Value: "05", Desc: "Maio" },
-                  { Value: "06", Desc: "Junho" },
-                  { Value: "07", Desc: "Julho" },
-                  { Value: "08", Desc: "Agosto" },
-                  { Value: "09", Desc: "Setembro" },
-                  { Value: "10", Desc: "Outrubro" },
-                  { Value: "11", Desc: "Novembro" },
-                  { Value: "12", Desc: "Dezembro" },
-                ]}
-              />
-            </FormControl>
-            <Button
-              type="submit"
-              variant="contained"
-              className={"btnPesquisar"}
-              onClick={() => buscarMovimentacoes()}
-            >
-              Pesquisar
-            </Button>
-          </div>
-
-          <Grid item xs={12} md={12} lg={12} className={"gridTableMovi"}>
-            <TableContainer component={Paper} className={"tableMovi"}>
-              <Table
-                sx={{ minWidth: 650 }}
-                size="small"
-                aria-label="a dense table"
+            <div className={"divBtnPesquisa"}>
+              <FormControl sx={{ m: 1, minWidth: 120 }}>
+                <SelectInput
+                  id={"Ano"}
+                  type={"text"}
+                  placeholder={"Ano"}
+                  keyDesc={"Ano"}
+                  keyValue={"Ano"}
+                  value={ano ?? ""}
+                  handleChangeTextInput={handleChangeAno}
+                  listOpts={listAnos}
+                />
+              </FormControl>
+              <FormControl sx={{ m: 1, minWidth: 120 }}>
+                <SelectInput
+                  id={"mes"}
+                  type={"text"}
+                  placeholder={"Mês"}
+                  keyDesc={"Desc"}
+                  keyValue={"Value"}
+                  value={mes ?? ""}
+                  handleChangeTextInput={handleChangeMes}
+                  listOpts={[
+                    { Value: "01", Desc: "Janeiro" },
+                    { Value: "02", Desc: "Fevereiro" },
+                    { Value: "03", Desc: "Março" },
+                    { Value: "04", Desc: "Abril" },
+                    { Value: "05", Desc: "Maio" },
+                    { Value: "06", Desc: "Junho" },
+                    { Value: "07", Desc: "Julho" },
+                    { Value: "08", Desc: "Agosto" },
+                    { Value: "09", Desc: "Setembro" },
+                    { Value: "10", Desc: "Outrubro" },
+                    { Value: "11", Desc: "Novembro" },
+                    { Value: "12", Desc: "Dezembro" },
+                  ]}
+                />
+              </FormControl>
+              <Button
+                type="submit"
+                variant="contained"
+                className={"btnPesquisar"}
+                onClick={() => buscarMovimentacoes()}
               >
-                <TableHead className={"tableHead"}>
-                  <TableRow>
-                    <TableCell>Descrição</TableCell>
-                    <TableCell>Data</TableCell>
-                    <TableCell>Tipo</TableCell>
-                    <TableCell align="right">Valor</TableCell>
-                    <TableCell align="right"></TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {rowsMovimentacoes.length > 0 ? (
-                    rowsMovimentacoes.map((row: any) => (
-                      <TableRow
-                        key={`table-row-${row.Id}`}
-                        sx={{
-                          "&:last-child td, &:last-child th": { border: 0 },
-                        }}
-                      >
-                        <TableCell
-                          key={`th-Descricao-${row.Id}`}
-                          component="th"
-                          scope="row"
+                Pesquisar
+              </Button>
+            </div>
+
+            <Grid item xs={12} md={12} lg={12} className={"gridTableMovi"}>
+              <TableContainer component={Paper} className={"tableMovi"}>
+                <Table
+                  sx={{ minWidth: 650 }}
+                  size="small"
+                  aria-label="a dense table"
+                >
+                  <TableHead className={"tableHead"}>
+                    <TableRow>
+                      <TableCell>Descrição</TableCell>
+                      <TableCell>Data</TableCell>
+                      <TableCell>Tipo</TableCell>
+                      <TableCell align="right">Valor</TableCell>
+                      <TableCell align="right"></TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {rowsMovimentacoes.length > 0 ? (
+                      rowsMovimentacoes.map((row: any) => (
+                        <TableRow
+                          key={`table-row-${row.Id}`}
+                          sx={{
+                            "&:last-child td, &:last-child th": { border: 0 },
+                          }}
                         >
-                          {row.Descricao}
-                        </TableCell>
-                        <TableCell key={`th-DataMovimentacao-${row.Id}`}>
-                          {DateToString(row.DataMovimentacao)}
-                        </TableCell>
-                        <TableCell key={`th-TipoAcao-${row.Id}`}>
-                          {row.TipoAcao.Codigo == 1 ? (
-                            <Stack
-                              className={"moneyAdd"}
-                              direction="row"
-                              alignItems="center"
-                              gap={1}
-                            >
-                              <ThumbUpOffAlt />
-                              <Typography variant="body1">
-                                {row.TipoAcao.Descricao}
-                              </Typography>
-                            </Stack>
-                          ) : (
-                            <Stack
-                              className={"moneyRem"}
-                              direction="row"
-                              alignItems="center"
-                              gap={1}
-                            >
-                              <ThumbDownOffAltIcon />
-                              <Typography variant="body1">
-                                {row.TipoAcao.Descricao}
-                              </Typography>
-                            </Stack>
-                          )}
-                        </TableCell>
-                        <TableCell key={`th-Valor-${row.Id}`} align="right">
-                          {NumberToCurrecy(parseFloat(row.Valor))}
-                        </TableCell>
-                        <TableCell key={`th-acao-${row.Id}`} align="right">
-                          {!row.MovimentacaoCompartilhada ? (
+                          <TableCell
+                            key={`th-Descricao-${row.Id}`}
+                            component="th"
+                            scope="row"
+                          >
+                            {row.Descricao}
+                          </TableCell>
+                          <TableCell key={`th-DataMovimentacao-${row.Id}`}>
+                            {DateToString(row.DataMovimentacao)}
+                          </TableCell>
+                          <TableCell key={`th-TipoAcao-${row.Id}`}>
+                            {row.TipoAcao.Codigo == 1 ? (
+                              <Stack
+                                className={"moneyAdd"}
+                                direction="row"
+                                alignItems="center"
+                                gap={1}
+                              >
+                                <ThumbUpOffAlt />
+                                <Typography variant="body1">
+                                  {row.TipoAcao.Descricao}
+                                </Typography>
+                              </Stack>
+                            ) : (
+                              <Stack
+                                className={"moneyRem"}
+                                direction="row"
+                                alignItems="center"
+                                gap={1}
+                              >
+                                <ThumbDownOffAltIcon />
+                                <Typography variant="body1">
+                                  {row.TipoAcao.Descricao}
+                                </Typography>
+                              </Stack>
+                            )}
+                          </TableCell>
+                          <TableCell key={`th-Valor-${row.Id}`} align="right">
+                            {NumberToCurrecy(parseFloat(row.Valor))}
+                          </TableCell>
+                          <TableCell key={`th-acao-${row.Id}`} align="right">
+                            {!row.MovimentacaoCompartilhada ? (
+                              <Button
+                                variant="contained"
+                                color="info"
+                                onClick={() => handleOpenEdit(row)}
+                                className={"btnCircleEdit"}
+                              >
+                                <EditIcon />
+                              </Button>
+                            ) : (
+                              <></>
+                              // <Button
+                              //   variant="contained"
+                              //   color="info"
+                              //   disabled
+                              //   title="Não é possível editar uma movimentação compartilhada, remova e adicione novamente"
+                              //   onClick={() => handleOpenEdit(row)}
+                              //   className={"btnCircleEdit"}
+                              // >
+                              //   <EditIcon />
+                              // </Button>
+                            )}
+
                             <Button
                               variant="contained"
-                              color="info"
-                              onClick={() => handleOpenEdit(row)}
-                              className={"btnCircleEdit"}
+                              color="error"
+                              onClick={() => handleOpenRemove(row)}
+                              className={"btnCircleRemove"}
                             >
-                              <EditIcon />
+                              <RemoveIcon />
                             </Button>
-                          ) : (
-                            <></>
-                            // <Button
-                            //   variant="contained"
-                            //   color="info"
-                            //   disabled
-                            //   title="Não é possível editar uma movimentação compartilhada, remova e adicione novamente"
-                            //   onClick={() => handleOpenEdit(row)}
-                            //   className={"btnCircleEdit"}
-                            // >
-                            //   <EditIcon />
-                            // </Button>
-                          )}
-
-                          <Button
-                            variant="contained"
-                            color="error"
-                            onClick={() => handleOpenRemove(row)}
-                            className={"btnCircleRemove"}
-                          >
-                            <RemoveIcon />
-                          </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell
+                          colSpan={5}
+                          key={`th-vazio`}
+                          component="th"
+                          scope="row"
+                          className={"vazio"}
+                        >
+                          Nenhum dado encontrado
                         </TableCell>
                       </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell
-                        colSpan={5}
-                        key={`th-vazio`}
-                        component="th"
-                        scope="row"
-                        className={"vazio"}
-                      >
-                        Nenhum dado encontrado
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-
-            <div>
-              <Modal
-                open={open}
-                onClose={handleClose}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-              >
-                <Box className="modalCustom">
-                  <Typography
-                    id="modal-modal-title"
-                    variant="h6"
-                    component="h2"
-                  >
-                    Movimentação
-                  </Typography>
-
-                  <form
-                    className="mt-8 space-y-6 form-modal"
-                    onSubmit={handleSubmit(
-                      addMovimentacao
-                        ? cadastrarMovimentacao
-                        : alterarMovimentacao
                     )}
-                  >
-                    <Grid container spacing={3}>
-                      <Grid item xs={6} md={6} lg={6}>
-                        <div className="rounded-md shadow-sm -space-y-px">
-                          <div>
-                            <TextInput
-                              id={"descricao"}
-                              type={"text"}
-                              required={true}
-                              placeholder={"Descrição"}
-                              value={movimentacoesModel?.Descricao}
-                              handleChangeTextInput={
-                                handleSetInputText_Descricao
-                              }
-                            />
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
+              <div>
+                <Modal
+                  open={open}
+                  onClose={handleClose}
+                  aria-labelledby="modal-modal-title"
+                  aria-describedby="modal-modal-description"
+                >
+                  <Box className="modalCustom">
+                    <Typography
+                      id="modal-modal-title"
+                      variant="h6"
+                      component="h2"
+                    >
+                      Movimentação
+                    </Typography>
+
+                    <form
+                      className="mt-8 space-y-6 form-modal"
+                      onSubmit={handleSubmit(
+                        addMovimentacao
+                          ? cadastrarMovimentacao
+                          : alterarMovimentacao
+                      )}
+                    >
+                      <Grid container spacing={3}>
+                        <Grid item xs={6} md={6} lg={6}>
+                          <div className="rounded-md shadow-sm -space-y-px">
+                            <div>
+                              <TextInput
+                                id={"descricao"}
+                                type={"text"}
+                                required={true}
+                                placeholder={"Descrição"}
+                                value={movimentacoesModel?.Descricao}
+                                handleChangeTextInput={
+                                  handleSetInputText_Descricao
+                                }
+                              />
+                            </div>
                           </div>
-                        </div>
-                      </Grid>
-                      <Grid item xs={6} md={6} lg={6}>
-                        <div className="rounded-md shadow-sm -space-y-px">
-                          <div>
-                            <TextInput
-                              id={"valor"}
-                              type={"text"}
-                              required={true}
-                              placeholder={"Valor"}
-                              value={valorMask}
-                              handleChangeTextInput={(e) => {
-                                handleSetInputText_Valor(e);
-                              }}
-                            />
+                        </Grid>
+                        <Grid item xs={6} md={6} lg={6}>
+                          <div className="rounded-md shadow-sm -space-y-px">
+                            <div>
+                              <TextInput
+                                id={"valor"}
+                                type={"text"}
+                                required={true}
+                                placeholder={"Valor"}
+                                value={valorMask}
+                                handleChangeTextInput={(e) => {
+                                  handleSetInputText_Valor(e);
+                                }}
+                              />
+                            </div>
                           </div>
-                        </div>
-                      </Grid>
-                      <Grid item xs={6} md={6} lg={6}>
-                        <div className="rounded-md shadow-sm -space-y-px">
-                          <div>
-                            <TextInput
-                              id={"dataMovimetacao"}
-                              type={"date"}
-                              required={true}
-                              placeholder={"Data Movimentação"}
-                              value={covertDateYYYYmmdd(
-                                movimentacoesModel?.DataMovimentacao == null
-                                  ? getDateYYYYmmdd()
-                                  : movimentacoesModel.DataMovimentacao
-                              )}
-                              handleChangeTextInput={
-                                handleSetInputText_DataMovimentacao
-                              }
-                            />
+                        </Grid>
+                        <Grid item xs={6} md={6} lg={6}>
+                          <div className="rounded-md shadow-sm -space-y-px">
+                            <div>
+                              <TextInput
+                                id={"dataMovimetacao"}
+                                type={"date"}
+                                required={true}
+                                autoFocus
+                                placeholder={"Data Movimentação"}
+                                value={covertDateYYYYmmdd(
+                                  movimentacoesModel?.DataMovimentacao == null
+                                    ? getDateYYYYmmdd()
+                                    : movimentacoesModel.DataMovimentacao
+                                )}
+                                handleChangeTextInput={
+                                  handleSetInputText_DataMovimentacao
+                                }
+                              />
+                            </div>
                           </div>
-                        </div>
-                      </Grid>
-                      <Grid item xs={6} md={6} lg={6}>
-                        <div className="rounded-md shadow-sm -space-y-px">
-                          <div>
-                            <SelectInput
-                              id={"tipoAcao"}
-                              placeholder={"Tipo"}
-                              keyDesc={"Desc"}
-                              keyValue={"Value"}
-                              required={true}
-                              value={movimentacoesModel?.TipoAcaoId}
-                              handleChangeTextInput={
-                                handleSetInputText_TipoAcao
-                              }
-                              listOpts={[
-                                { Value: 1, Desc: "Entrada" },
-                                { Value: 2, Desc: "Saída" },
-                              ]}
-                            />
+                        </Grid>
+                        <Grid item xs={6} md={6} lg={6}>
+                          <div className="rounded-md shadow-sm -space-y-px">
+                            <div>
+                              <SelectInput
+                                id={"tipoAcao"}
+                                placeholder={"Tipo"}
+                                keyDesc={"Desc"}
+                                keyValue={"Value"}
+                                required={true}
+                                value={movimentacoesModel?.TipoAcaoId}
+                                handleChangeTextInput={
+                                  handleSetInputText_TipoAcao
+                                }
+                                listOpts={[
+                                  { Value: 1, Desc: "Entrada" },
+                                  { Value: 2, Desc: "Saída" },
+                                ]}
+                              />
+                            </div>
                           </div>
-                        </div>
-                      </Grid>
-                      {(() => {
-                        if (
-                          addMovimentacao &&
-                          movimentacoesModel.TipoAcaoId == 2
-                        ) {
-                          return (
-                            <>
-                              <Grid item xs={6} md={6} lg={6}>
-                                <div className="rounded-md shadow-sm -space-y-px">
-                                  <div>
-                                    <label>Compartilhar Saida</label>
-                                    <Switch
-                                      checked={
-                                        movimentacoesModel.MovimentacaoCompartilhada
-                                      }
-                                      onChange={(e) => {
-                                        setMovimentacoesModel({
-                                          ...movimentacoesModel,
-                                          MovimentacaoCompartilhada:
-                                            e.target.checked,
-                                        });
-                                      }}
-                                    />
-                                  </div>
-                                </div>
-                              </Grid>
-                              {movimentacoesModel.MovimentacaoCompartilhada ? (
+                        </Grid>
+                        {(() => {
+                          if (
+                            addMovimentacao &&
+                            movimentacoesModel.TipoAcaoId == 2
+                          ) {
+                            return (
+                              <>
                                 <Grid item xs={6} md={6} lg={6}>
                                   <div className="rounded-md shadow-sm -space-y-px">
                                     <div>
-                                      <SelectInput
-                                        id={
-                                          "movimentacoesCompartilhadaUsuarioId"
+                                      <label>Compartilhar Saida</label>
+                                      <Switch
+                                        checked={
+                                          movimentacoesModel.MovimentacaoCompartilhada
                                         }
-                                        type={"text"}
-                                        placeholder={
-                                          "Movimentações Compartilhadas"
-                                        }
-                                        keyDesc={"Nome"}
-                                        required={true}
-                                        keyValue={"Id"}
-                                        value={
-                                          movimentacoesModel.UsuarioMovimentacaoCompartilhadaId ??
-                                          ""
-                                        }
-                                        handleChangeTextInput={
-                                          handleSetInputText_UsuarioId
-                                        }
-                                        listOpts={listUsuarios}
+                                        onChange={(e) => {
+                                          setMovimentacoesModel({
+                                            ...movimentacoesModel,
+                                            MovimentacaoCompartilhada:
+                                              e.target.checked,
+                                          });
+                                        }}
                                       />
                                     </div>
                                   </div>
                                 </Grid>
-                              ) : (
-                                <></>
-                              )}
-                            </>
-                          );
-                        }
-                      })()}
-                    </Grid>
+                                {movimentacoesModel.MovimentacaoCompartilhada ? (
+                                  <Grid item xs={6} md={6} lg={6}>
+                                    <div className="rounded-md shadow-sm -space-y-px">
+                                      <div>
+                                        <SelectInput
+                                          id={
+                                            "movimentacoesCompartilhadaUsuarioId"
+                                          }
+                                          type={"text"}
+                                          placeholder={
+                                            "Movimentações Compartilhadas"
+                                          }
+                                          keyDesc={"Nome"}
+                                          required={true}
+                                          keyValue={"Id"}
+                                          value={
+                                            movimentacoesModel.UsuarioMovimentacaoCompartilhadaId ??
+                                            ""
+                                          }
+                                          handleChangeTextInput={
+                                            handleSetInputText_UsuarioId
+                                          }
+                                          listOpts={listUsuarios}
+                                        />
+                                      </div>
+                                    </div>
+                                  </Grid>
+                                ) : (
+                                  <></>
+                                )}
+                              </>
+                            );
+                          }
+                        })()}
+                      </Grid>
 
-                    <div className="flex items-right justify-between div-modal-btns">
-                      <Button
-                        type="button"
-                        variant="outlined"
-                        onClick={(e) => setOpen(false)}
-                        className={"btnModal"}
-                      >
-                        Cancelar
-                      </Button>
-                      <Button
-                        type="submit"
-                        variant="contained"
-                        className={"btnModal"}
-                      >
-                        Cadastrar
-                      </Button>
-                    </div>
-                  </form>
-                </Box>
-              </Modal>
-            </div>
-            <div className={"divBottom"}>
-              <div className={"divBottomHolder"}>
-                <Button
-                  variant="contained"
-                  color="success"
-                  onClick={handleOpenAdd}
-                  className={"btnCircle"}
-                >
-                  <AddIcon />
-                </Button>
+                      <div className="flex items-right justify-between div-modal-btns">
+                        <Button
+                          type="button"
+                          variant="outlined"
+                          onClick={(e) => setOpen(false)}
+                          className={"btnModal"}
+                        >
+                          Cancelar
+                        </Button>
+                        <Button
+                          type="submit"
+                          variant="contained"
+                          className={"btnModal"}
+                        >
+                          Cadastrar
+                        </Button>
+                      </div>
+                    </form>
+                  </Box>
+                </Modal>
               </div>
-            </div>
-          </Grid>
-        </Paper>
+              <div className={"divBottom"}>
+                <div className={"divBottomHolder"}>
+                  <Button
+                    variant="contained"
+                    color="success"
+                    onClick={handleOpenAdd}
+                    className={"btnCircle"}
+                  >
+                    <AddIcon />
+                  </Button>
+                </div>
+              </div>
+            </Grid>
+          </Paper>
+        </Grid>
       </Grid>
-    </Grid>
+    </>
   );
 }
-
-Movimentacoes.getLayout = function getLayout(page: ReactElement) {
-  return <Theme>{page}</Theme>;
-};
 
 export default Movimentacoes;

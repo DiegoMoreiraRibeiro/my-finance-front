@@ -7,39 +7,68 @@ import "./../styles/globals.css";
 import "./../styles/main.css";
 import { parseCookies } from "nookies";
 import Index from ".";
+import Theme from "../components/views/theme";
+import Head from "next/head";
+import dynamic from "next/dynamic";
 
-export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
-  getLayout?: (page: ReactElement) => ReactNode;
+export type NextPageWithTheme<P = {}, IP = P> = NextPage<P, IP> & {
+  getTheme?: (page: ReactElement) => ReactNode;
 };
 
-type AppPropsWithLayout = AppProps & {
-  Component: NextPageWithLayout;
+type AppPropsWithTheme = AppProps & {
+  Component: NextPageWithTheme;
 };
 
 export default function MyApp({ Component, pageProps: { ...pageProps } }: any) {
   const { "nextauth.token": token } = parseCookies();
-  const [showChild, setShowChild] = useState(false);
 
-  const getLayout = Component.getLayout ?? ((page: any) => page);
-
-  if (Component.name == "Index") {
+  function getHeader() {
     return (
-      <AuthProvider>
-        <Component {...pageProps} />
-      </AuthProvider>
+      <div>
+        <Head>
+          <title>My page title</title>
+          <meta property="og:title" content="My page title" key="title" />
+        </Head>
+        <Head>
+          <meta property="og:title" content="My new title" key="title" />
+        </Head>
+      </div>
     );
-  } else {
-    if (token == "" || token == undefined) {
+  }
+
+  const TH = dynamic(() => import("../components/views/theme"), {
+    ssr: false,
+  });
+
+  function getPageAndAuth(Component) {
+    if (Component.name == "Index") {
       return (
         <AuthProvider>
-          <Index />
+          <Component {...pageProps} />
+        </AuthProvider>
+      );
+    } else {
+      if (token == "" || token == undefined) {
+        return (
+          <AuthProvider>
+            <Index />
+          </AuthProvider>
+        );
+      }
+      return (
+        <AuthProvider>
+          <TH>
+            <Component {...pageProps} />
+          </TH>
         </AuthProvider>
       );
     }
-    return getLayout(
-      <AuthProvider>
-        <Component {...pageProps} />
-      </AuthProvider>
-    );
   }
+
+  return (
+    <>
+      {getHeader()}
+      {getPageAndAuth(Component)}
+    </>
+  );
 }
